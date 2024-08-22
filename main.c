@@ -109,7 +109,8 @@ void init_dircontents(DirContents* folder, int count) {
 	}
 }
 
-// first retrieves number of files in the directory, then 
+// first retrieves number of files in the directory, then copies all the
+// file names into an initialized struct
 int get_files(DirContents* folder) {
 	int count = 0;
 
@@ -143,6 +144,8 @@ int get_files(DirContents* folder) {
 	return count;
 };
 
+// switches from left to right pane, updates directory list to ensure the choice
+// isn't greater than the selected directory index
 int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder) {
 	if (nomodfolder->highlight == 1) {
 		--nomodfolder->highlight;
@@ -162,6 +165,8 @@ int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder) {
 	return choice;
 }
 
+// moves selected index up or down depending on the string given, making sure to
+// stay within the bounds of the array
 int change_index(int choice, char* direction, DirContents* nomodfolder, DirContents* modfolder) {
 	if (nomodfolder->highlight == 1) {
 		if (strcmp(direction, "up")) {
@@ -179,6 +184,8 @@ int change_index(int choice, char* direction, DirContents* nomodfolder, DirConte
 	return choice;
 }
 
+// prints contents of the file array, highlighting the item that's currently
+// being selected
 void display(int choice, DirContents* folder) {
 	werase(folder->win);
 	if (choice > folder->size - 1) return;
