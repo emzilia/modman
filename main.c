@@ -109,6 +109,13 @@ void init_dircontents(DirContents* folder, int count) {
 	}
 }
 
+void free_elements(DirContents* folder) {
+	for (int i = 0; i < folder->size; ++i) {
+		free(folder->files[i]);	
+	}
+	free(folder->files);
+}
+
 // first retrieves number of files in the directory, then copies all the
 // file names into an initialized struct
 int get_files(DirContents* folder) {
@@ -187,7 +194,7 @@ int change_index(int choice, char* direction, DirContents* nomodfolder, DirConte
 }
 
 // moves the file indicated by the index to the other directory/pane
-int move_index(int choice, DirContents* folder1, DirContents* folder2) {
+int move_file(int choice, DirContents* folder1, DirContents* folder2) {
 	DirContents* originfolder;
 	DirContents* destfolder;
 
@@ -219,8 +226,9 @@ int move_index(int choice, DirContents* folder1, DirContents* folder2) {
 
 // prints contents of the file array, highlighting the item that's currently
 // being selected
-void display(int choice, DirContents* folder) {
+void display_panes(int choice, DirContents* folder) {
 	werase(folder->win);
+	if (folder->size == 0) return;
 	if (choice > folder->size - 1) return;
 	for (int i = 0; i < folder->size; ++i) {
 		if (folder->highlight) {
@@ -234,7 +242,14 @@ void display(int choice, DirContents* folder) {
 		if (choice == i) continue;
 		mvwprintw(folder->win, i + 1, 1, folder->files[i]);
 	};	
+	mvwprintw(border_window, 21, 2, "nomods: %d", folder->size);
 	wrefresh(folder->win);
+}
+
+void display_metadata(int choice, WINDOW* win, DirContents* nomodfolder, DirContents* modfolder) {
+	mvwprintw(win, 21, 2, "nomods: %d", nomodfolder->size);
+	mvwprintw(win, 21, 31, "mods: %d", modfolder->size);
+	mvwprintw(win, 25, 2, "choice: %d", choice);
 }
 
 int main() {
@@ -244,16 +259,16 @@ int main() {
 	init_window(&nomod, &mod);
 
 	// count is the number of files in the directory
-	int count = get_files(&nomod);
+	get_files(&nomod);
 	get_files(&mod);
 
 	int active = 1;
 	while (active) {
-		display(choice, &nomod);
-		display(choice, &mod);
-		mvwprintw(border_window, 21, 2, "nomods: %d", nomod.size);
-		mvwprintw(border_window, 21, 31, "mods: %d", mod.size);
-		mvwprintw(border_window, 25, 2, "choice: %d", choice);
+		display_panes(choice, &nomod);
+		display_panes(choice, &mod);
+		display_metadata(choice, border_window, &nomod, &mod);
+		get_files(&nomod);
+		get_files(&mod);
 		int response = wgetch(border_window);
 		switch (response) {
 			case 'j':
@@ -273,7 +288,7 @@ int main() {
 				choice = change_index(choice, "up", &nomod, &mod);
 				break;
 			case ' ':
-				choice = move_index(choice, &nomod, &mod);	
+				choice = move_file(choice, &nomod, &mod);	
 				break;
 				
 			case 'q':
@@ -282,5 +297,7 @@ int main() {
 		}
 	};
 	endwin();
+	free_elements(&nomod);
+	free_elements(&mod);
 	exit(EXIT_SUCCESS);
 }
