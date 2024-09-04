@@ -160,7 +160,7 @@ int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder) {
 		--nomodfolder->highlight;
 		++modfolder->highlight;
 		if (choice > modfolder->size - 1) {
-			choice = nomodfolder->size - 1;
+			choice = modfolder->size - 1;
 		}
 	} else if (modfolder->highlight == 1) {
 		nomodfolder->size = get_files(nomodfolder);
@@ -206,6 +206,8 @@ int move_file(int choice, DirContents* folder1, DirContents* folder2) {
 		originfolder = folder2;
 	}
 
+	if (originfolder->size == 0) return 0;
+
 	size_t originpathlength = (strlen(originfolder->path) + strlen(originfolder->files[choice]) + 1);
 	char* originfullpath = (char*)malloc(originpathlength);
 	sprintf(originfullpath, "%s%s", originfolder->path, originfolder->files[choice]);
@@ -219,7 +221,7 @@ int move_file(int choice, DirContents* folder1, DirContents* folder2) {
 	originfolder->size = get_files(originfolder);
 	destfolder->size = get_files(destfolder);
 
-	if (choice > originfolder->size - 1) return --choice;
+	if ((choice > originfolder->size - 1) && (choice > 0)) --choice;
 
 	return choice;
 }
@@ -227,6 +229,7 @@ int move_file(int choice, DirContents* folder1, DirContents* folder2) {
 // prints contents of the file array, highlighting the item that's currently
 // being selected
 void display_panes(int choice, DirContents* folder) {
+	folder->size = get_files(folder);
 	werase(folder->win);
 	if (folder->size == 0) return;
 	if (choice > folder->size - 1) return;
@@ -242,7 +245,6 @@ void display_panes(int choice, DirContents* folder) {
 		if (choice == i) continue;
 		mvwprintw(folder->win, i + 1, 1, folder->files[i]);
 	};	
-	mvwprintw(border_window, 21, 2, "nomods: %d", folder->size);
 	wrefresh(folder->win);
 }
 
@@ -292,7 +294,7 @@ int main() {
 				break;
 				
 			case 'q':
-				active = false;
+				active = 0;
 				break;
 		}
 	};
