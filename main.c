@@ -101,7 +101,7 @@ int get_files(DirContents* folder) {
 	dir = opendir(folder->path);
 	if (dir == NULL) {
 		endwin();
-		printf("Error: Unable to open file for count"); 
+		printf("Error: Unable to open file for count\n"); 
 		exit(EXIT_FAILURE);
 	}
 	while ((entry = readdir(dir)) != NULL) {
@@ -115,7 +115,7 @@ int get_files(DirContents* folder) {
 	dir = opendir(folder->path);
 	if (dir == NULL) {
 		endwin(); 
-		printf("Error: Unable to open file for copy"); 
+		printf("Error: Unable to open file for copy\n"); 
 		exit(EXIT_FAILURE);
 	}
 	int i = 0;
@@ -147,11 +147,11 @@ void display(int choice, DirContents* folder) {
 }
 
 DirContents nomod = {
-	.path = "/home/em/repos/scrolls/nomods/",
+	.path = "/home/em/repos/modman/nomods/",
 	.highlight = 1,
 };
 DirContents mod = {
-	.path = "/home/em/repos/scrolls/mods/",
+	.path = "/home/em/repos/modman/mods/",
 	.highlight = 0,
 };
 
