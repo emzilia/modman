@@ -4,10 +4,10 @@
 #include <ncurses.h>
 #include <string.h>
 
-// File definitions
+// file definitions
 #define MAX_FILE_LENGTH 64
 
-// Window definitions
+// window size and position assignments
 #define BORDER_Y 30
 #define BORDER_X 60
 #define BORDER_STARTX 1
@@ -27,8 +27,7 @@ WINDOW* border_window;
 WINDOW* mod_window;
 WINDOW* nomod_window;;
 
-// Directory structs
-
+// directory content struct
 typedef struct DirContents {
 	char*	path;
 	int 	size;
@@ -37,6 +36,7 @@ typedef struct DirContents {
 	WINDOW*	win;
 } DirContents;
 
+// global assignments
 DIR *dir;
 struct dirent *entry;
 
@@ -64,6 +64,7 @@ void init_window(DirContents* nomod, DirContents* mod) {
 	);
 	box(nomod_window, '|', '-');
 
+	// static text placeholder
 	mvwprintw(
 		border_window,
 		1, 1,
@@ -78,6 +79,8 @@ void init_window(DirContents* nomod, DirContents* mod) {
 	wrefresh(nomod_window);
 }
 
+// allocates memory for the DirContents files array and each individual
+// element tallied by count
 void init_dircontents(DirContents* folder, int count) {
 	folder->size = count;
 	folder->files = malloc((count + 1) * sizeof(char*));
@@ -96,8 +99,10 @@ void init_dircontents(DirContents* folder, int count) {
 	}
 }
 
+// first retrieves number of files in the directory, then 
 int get_files(DirContents* folder) {
 	int count = 0;
+
 	dir = opendir(folder->path);
 	if (dir == NULL) {
 		endwin();
@@ -107,7 +112,7 @@ int get_files(DirContents* folder) {
 	while ((entry = readdir(dir)) != NULL) {
 		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
 		++count;
-    	}
+   	}
 	closedir(dir);
 
 	init_dircontents(folder, count);
@@ -156,10 +161,12 @@ DirContents mod = {
 };
 
 int main() {
+	// choice is what index is currently selected
 	int choice = 0;
 
 	init_window(&nomod, &mod);
 
+	// count is the number of files in the directory
 	int count = get_files(&nomod);
 	get_files(&mod);
 
