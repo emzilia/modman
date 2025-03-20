@@ -148,16 +148,18 @@ int get_files(DirContents* folder) {
 // isn't greater than the selected directory index
 int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder) {
 	if (nomodfolder->highlight == 1) {
+		modfolder->size = get_files(modfolder);
+		if (modfolder->size == 0) return 0;
 		--nomodfolder->highlight;
 		++modfolder->highlight;
-		nomodfolder->size = get_files(nomodfolder);
 		if (choice > modfolder->size - 1) {
 			choice = nomodfolder->size - 1;
 		}
 	} else if (modfolder->highlight == 1) {
+		nomodfolder->size = get_files(nomodfolder);
+		if (nomodfolder->size == 0) return 0;
 		++nomodfolder->highlight;
 		--modfolder->highlight;
-		modfolder->size = get_files(modfolder);
 		if (choice > nomodfolder->size - 1) {
 			choice = nomodfolder->size - 1;
 		}
@@ -181,6 +183,37 @@ int change_index(int choice, char* direction, DirContents* nomodfolder, DirConte
 			if (choice > 0) --choice;	
 		}
 	}
+	return choice;
+}
+
+// moves the file indicated by the index to the other directory/pane
+int move_index(int choice, DirContents* folder1, DirContents* folder2) {
+	DirContents* originfolder;
+	DirContents* destfolder;
+
+	if (folder1->highlight == 1) {
+	       	originfolder = folder1;
+	       	destfolder = folder2;
+	} else {
+		destfolder = folder1;
+		originfolder = folder2;
+	}
+
+	size_t originpathlength = (strlen(originfolder->path) + strlen(originfolder->files[choice]) + 1);
+	char* originfullpath = (char*)malloc(originpathlength);
+	sprintf(originfullpath, "%s%s", originfolder->path, originfolder->files[choice]);
+
+	size_t destpathlength = (strlen(destfolder->path) + strlen(originfolder->files[choice]) + 1);
+	char* destfullpath = (char*)malloc(destpathlength);
+	sprintf(destfullpath, "%s%s", destfolder->path, originfolder->files[choice]);
+
+	rename(originfullpath, destfullpath);
+
+	originfolder->size = get_files(originfolder);
+	destfolder->size = get_files(destfolder);
+
+	if (choice > originfolder->size - 1) return --choice;
+
 	return choice;
 }
 
@@ -240,6 +273,7 @@ int main() {
 				choice = change_index(choice, "up", &nomod, &mod);
 				break;
 			case ' ':
+				choice = move_index(choice, &nomod, &mod);	
 				break;
 				
 			case 'q':
