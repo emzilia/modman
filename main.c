@@ -42,7 +42,7 @@ struct dirent *entry;
 
 DirContents nomod = {
 	.path = "/home/em/repos/modman/nomods/",
-	.highlight = 1,
+	.highlight = 0,
 };
 DirContents mod = {
 	.path = "/home/em/repos/modman/mods/",
@@ -151,6 +151,11 @@ int get_files(DirContents* folder) {
 	return count;
 };
 
+void refresh_files(DirContents* nomodfolder, DirContents* modfolder) {
+	get_files(nomodfolder);
+	get_files(modfolder);
+}
+
 // switches from left to right pane, updates directory list to ensure the choice
 // isn't greater than the selected directory index
 int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder) {
@@ -223,6 +228,8 @@ int move_file(int choice, DirContents* folder1, DirContents* folder2) {
 
 	if ((choice > originfolder->size - 1) && (choice > 0)) --choice;
 
+	if (originfolder->size == 0) switch_pane(choice, originfolder, destfolder);
+
 	return choice;
 }
 
@@ -231,7 +238,10 @@ int move_file(int choice, DirContents* folder1, DirContents* folder2) {
 void display_panes(int choice, DirContents* folder) {
 	folder->size = get_files(folder);
 	werase(folder->win);
-	if (folder->size == 0) return;
+	if (folder->size == 0) {
+		wrefresh(folder->win);
+		return;
+	}
 	if (choice > folder->size - 1) return;
 	for (int i = 0; i < folder->size; ++i) {
 		if (folder->highlight) {
@@ -260,39 +270,42 @@ int main() {
 
 	init_window(&nomod, &mod);
 
-	// count is the number of files in the directory
-	get_files(&nomod);
-	get_files(&mod);
+	refresh_files(&nomod, &mod);
+
+	if (nomod.size > 0) nomod.highlight++;
+	else mod.highlight++;
 
 	int active = 1;
 	while (active) {
+		refresh_files(&nomod, &mod);
 		display_panes(choice, &nomod);
 		display_panes(choice, &mod);
 		display_metadata(choice, border_window, &nomod, &mod);
-		get_files(&nomod);
-		get_files(&mod);
 		int response = wgetch(border_window);
 		switch (response) {
+
 			case 'j':
 			case KEY_DOWN:
 				choice = change_index(choice, "down", &nomod, &mod);
-				break;
-			case 'l':
-			case KEY_RIGHT:
-				choice = switch_pane(choice, &nomod, &mod);
-				break;
-			case 'h':
-			case KEY_LEFT:
-				choice = switch_pane(choice, &nomod, &mod);
 				break;
 			case 'k':
 			case KEY_UP:
 				choice = change_index(choice, "up", &nomod, &mod);
 				break;
+			case 'h':
+			case KEY_LEFT:
+				choice = switch_pane(choice, &nomod, &mod);
+				break;
+			case 'l':
+			case KEY_RIGHT:
+				choice = switch_pane(choice, &nomod, &mod);
+				break;
 			case ' ':
 				choice = move_file(choice, &nomod, &mod);	
 				break;
-				
+			case 'r':
+				refresh_files(&nomod, &mod);
+				break;
 			case 'q':
 				active = 0;
 				break;
