@@ -49,6 +49,16 @@ DirContents mod = {
 	.highlight = 0,
 };
 
+// function declarations
+void init_window(DirContents* nomodfolder, DirContents* modfolder);
+void init_dircontents(DirContents* folder, int count);
+void free_elements(DirContents* folder);
+int get_files(DirContents* folder);
+void refresh_files(DirContents* nomodfolder, DirContents* modfolder);
+int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder);
+int change_index(int choice, char* direction, DirContents* nomodfolder, DirContents* modfolder);
+void display_panes(int choice, DirContents* folder);
+void display_metadata(int choice, WINDOW* win, DirContents* nomodfolder, DirContents* modfolder);
 
 // initializes three ncurses windows, one for the background/border
 // and two for the mod/inactive mod folders respectively
