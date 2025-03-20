@@ -5,7 +5,7 @@
 #include <string.h>
 
 // file definitions
-#define MAX_FILE_LENGTH 64
+#define MAX_FILENAME_LENGTH 64
 
 // window size and position assignments
 #define BORDER_Y 30
@@ -100,7 +100,7 @@ void init_dircontents(DirContents* folder, int count) {
 		exit(EXIT_FAILURE);
 	}
 	for (int i = 0; i < count; ++i) {
-		folder->files[i] = malloc((MAX_FILE_LENGTH + 1) * sizeof(char*));
+		folder->files[i] = malloc((MAX_FILENAME_LENGTH + 1) * sizeof(char*));
 		if (folder->files[i] == NULL) {
 			endwin();
 			fprintf(stderr, "Error: Unable to allocate memory for struct members\n");
