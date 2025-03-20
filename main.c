@@ -19,20 +19,20 @@
 #define NOMOD_STARTX 2
 
 #define MOD_Y 20
-#define MOD_X  29
+#define MOD_X 29
 #define MOD_STARTY 3
 #define MOD_STARTX 31
 
 WINDOW* border_window;
 WINDOW* mod_window;
-WINDOW* nomod_window;;
+WINDOW* nomod_window;
 
 // directory content struct
 typedef struct DirContents {
 	char*	path;
+	char**	files;
 	int 	size;
 	int	highlight;
-	char** 	files;
 	WINDOW*	win;
 } DirContents;
 
@@ -40,12 +40,23 @@ typedef struct DirContents {
 DIR *dir;
 struct dirent *entry;
 
-void init_window(DirContents* nomod, DirContents* mod) {
+DirContents nomod = {
+	.path = "/home/em/repos/modman/nomods/",
+	.highlight = 1,
+};
+DirContents mod = {
+	.path = "/home/em/repos/modman/mods/",
+	.highlight = 0,
+};
+
+
+// initializes three ncurses windows, one for the background/border
+// and two for the mod/inactive mod folders respectively
+void init_window(DirContents* nomodfolder, DirContents* modfolder) {
 	// init options
 	initscr();
 	noecho();
 	curs_set(0);
-//	start_color();
 
 	// init windows
 	border_window = newwin(
@@ -57,12 +68,10 @@ void init_window(DirContents* nomod, DirContents* mod) {
 	mod_window = newwin(
 			MOD_Y, MOD_X, MOD_STARTY, MOD_STARTX
 	);
-	box(mod_window, '|', '-');
 
 	nomod_window = newwin(
 			NOMOD_Y, NOMOD_X, NOMOD_STARTY, NOMOD_STARTX
 	);
-	box(nomod_window, '|', '-');
 
 	// static text placeholder
 	mvwprintw(
@@ -71,8 +80,9 @@ void init_window(DirContents* nomod, DirContents* mod) {
 		"\t Inactive Mods\t\t       Active Mods"
 	);
 
-	nomod->win = nomod_window;
-	mod->win = mod_window;
+	// DirContents type window assignment
+	nomodfolder->win = nomod_window;
+	modfolder->win = mod_window;
 
 	wrefresh(border_window);
 	wrefresh(mod_window);
@@ -186,15 +196,6 @@ void display(int choice, DirContents* folder) {
 	};	
 	wrefresh(folder->win);
 }
-
-DirContents nomod = {
-	.path = "/home/em/repos/modman/nomods/",
-	.highlight = 1,
-};
-DirContents mod = {
-	.path = "/home/em/repos/modman/mods/",
-	.highlight = 0,
-};
 
 int main() {
 	// choice is what index is currently selected
