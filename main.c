@@ -96,14 +96,14 @@ void init_dircontents(DirContents* folder, int count) {
 	folder->files = malloc((count + 1) * sizeof(char*));
 	if (folder->files == NULL) {
 		endwin();
-		printf("Error: Unable to allocate memory for struct\n"); 
+		fprintf(stderr, "Error: Unable to allocate memory for struct\n"); 
 		exit(EXIT_FAILURE);
 	}
 	for (int i = 0; i < count; ++i) {
 		folder->files[i] = malloc((MAX_FILE_LENGTH + 1) * sizeof(char*));
 		if (folder->files[i] == NULL) {
 			endwin();
-			printf("Error: Unable to allocate memory for struct members\n");
+			fprintf(stderr, "Error: Unable to allocate memory for struct members\n");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -124,7 +124,7 @@ int get_files(DirContents* folder) {
 	dir = opendir(folder->path);
 	if (dir == NULL) {
 		endwin();
-		printf("Error: Unable to open file for count\n"); 
+		fprintf(stderr, "Error: Unable to open file for count\n"); 
 		exit(EXIT_FAILURE);
 	}
 	while ((entry = readdir(dir)) != NULL) {
@@ -138,7 +138,7 @@ int get_files(DirContents* folder) {
 	dir = opendir(folder->path);
 	if (dir == NULL) {
 		endwin(); 
-		printf("Error: Unable to open file for copy\n"); 
+		fprintf(stderr, "Error: Unable to open file for copy\n"); 
 		exit(EXIT_FAILURE);
 	}
 	int i = 0;
