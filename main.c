@@ -133,6 +133,42 @@ int get_files(DirContents* folder) {
 	return count;
 };
 
+int switch_pane(int choice, DirContents* nomodfolder, DirContents* modfolder) {
+	if (nomodfolder->highlight == 1) {
+		--nomodfolder->highlight;
+		++modfolder->highlight;
+		nomodfolder->size = get_files(nomodfolder);
+		if (choice > modfolder->size - 1) {
+			choice = nomodfolder->size - 1;
+		}
+	} else if (modfolder->highlight == 1) {
+		++nomodfolder->highlight;
+		--modfolder->highlight;
+		modfolder->size = get_files(modfolder);
+		if (choice > nomodfolder->size - 1) {
+			choice = nomodfolder->size - 1;
+		}
+	}
+	return choice;
+}
+
+int change_index(int choice, char* direction, DirContents* nomodfolder, DirContents* modfolder) {
+	if (nomodfolder->highlight == 1) {
+		if (strcmp(direction, "up")) {
+			if (choice < nomodfolder->size - 1) ++choice;	
+		} else if (strcmp(direction, "down")) {
+			if (choice > 0) --choice;	
+		}
+	} else if (modfolder ->highlight == 1) {
+		if (strcmp(direction, "up")) {
+			if (choice < modfolder->size - 1) ++choice;	
+		} else if (strcmp(direction, "down")) {
+			if (choice > 0) --choice;	
+		}
+	}
+	return choice;
+}
+
 void display(int choice, DirContents* folder) {
 	werase(folder->win);
 	if (choice > folder->size - 1) return;
@@ -174,36 +210,28 @@ int main() {
 	while (active) {
 		display(choice, &nomod);
 		display(choice, &mod);
-		mvwprintw(border_window, 20, 1, "Count: %d", count);
-		mvwprintw(border_window, 21, 1, "Choice: %d", choice);
-		wrefresh(border_window);
+		mvwprintw(border_window, 21, 2, "nomods: %d", nomod.size);
+		mvwprintw(border_window, 21, 31, "mods: %d", mod.size);
+		mvwprintw(border_window, 25, 2, "choice: %d", choice);
 		int response = wgetch(border_window);
 		switch (response) {
 			case 'j':
 			case KEY_DOWN:
-				if (choice < count - 1) ++choice;
+				choice = change_index(choice, "down", &nomod, &mod);
 				break;
 			case 'l':
 			case KEY_RIGHT:
-				if (nomod.highlight == 1) {
-					--nomod.highlight;
-					++mod.highlight;
-					count = get_files(&mod);
-					if (choice > mod.size - 1) choice = nomod.size - 1;
-				}
+				choice = switch_pane(choice, &nomod, &mod);
 				break;
 			case 'h':
 			case KEY_LEFT:
-				if (mod.highlight == 1) {
-					++nomod.highlight;
-					--mod.highlight;
-					count = get_files(&nomod);
-					if (choice > nomod.size - 1) choice = nomod.size - 1;
-				}
+				choice = switch_pane(choice, &nomod, &mod);
 				break;
 			case 'k':
 			case KEY_UP:
-				if (choice > 0) --choice;
+				choice = change_index(choice, "up", &nomod, &mod);
+				break;
+			case ' ':
 				break;
 				
 			case 'q':
