@@ -242,7 +242,9 @@ void display_panes(int choice, DirContents* folder) {
 		wrefresh(folder->win);
 		return;
 	}
-	if (choice > folder->size - 1) return;
+	if (choice > folder->size - 1) {
+		choice = folder->size - 1;
+	}
 	for (int i = 0; i < folder->size; ++i) {
 		if (folder->highlight) {
 			wattron(folder->win, A_REVERSE);
@@ -278,9 +280,9 @@ int main() {
 	int active = 1;
 	while (active) {
 		refresh_files(&nomod, &mod);
+		display_metadata(choice, border_window, &nomod, &mod);
 		display_panes(choice, &nomod);
 		display_panes(choice, &mod);
-		display_metadata(choice, border_window, &nomod, &mod);
 		int response = wgetch(border_window);
 		switch (response) {
 
